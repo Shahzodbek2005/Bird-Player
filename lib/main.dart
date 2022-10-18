@@ -3,8 +3,13 @@ import 'package:bird_player/screens/permission_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Provider.debugCheckInvalidValueType = null;
+  await Hive.initFlutter();
+  await Hive.openBox('favourites');
   runApp(const MyApp());
 }
 

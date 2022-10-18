@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:bird_player/classes/player_service.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 
 class MusicCard extends StatelessWidget {
   final int id;
+  final int savedId;
   final String artist;
   final String songName;
   final String url;
@@ -12,6 +16,7 @@ class MusicCard extends StatelessWidget {
   const MusicCard(
       {Key? key,
       required this.id,
+      required this.savedId,
       required this.artist,
       required this.songName,
       required this.url,
@@ -80,10 +85,26 @@ class MusicCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.favorite_border,
-                color: Colors.white,
-                size: 20,
+              InkWell(
+                onTap: () async {
+                  final box = Hive.box('favourites');
+                  final id_ = id;
+                  final songName_ = songName;
+                  final artist_ = artist;
+                  final url_ = url;
+                  final details = {
+                    'id': '$id_',
+                    'songName': songName_,
+                    'artist': artist_,
+                    'url': url_,
+                  };
+                  box.add(jsonEncode(details));
+                },
+                child: Icon(
+                  (id == savedId) ? Icons.favorite_border : Icons.favorite,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
               const SizedBox(
                 width: 5,
