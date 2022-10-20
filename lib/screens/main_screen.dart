@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'dart:developer';
+import 'dart:convert';
 
+import 'package:bird_player/classes/functions.dart';
+import 'package:bird_player/classes/models/favourites_model.dart';
 import 'package:bird_player/classes/my_behavior.dart';
 import 'package:bird_player/widgets/bottom_menu.dart';
 import 'package:bird_player/widgets/categories.dart';
@@ -39,7 +41,7 @@ class _MainScreenState extends State<MainScreen> {
               child: GestureDetector(
                 onTap: () async {
                   await Hive.box('favourites').clear();
-                  log("toza");
+                  setState(() {});
                 },
                 child: const TopMenu(),
               ),
@@ -47,12 +49,9 @@ class _MainScreenState extends State<MainScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 13, left: 17, right: 17),
               child: GestureDetector(
-                  onTap: () async {
-                    log("see");
-                    final data = Hive.box<String>('favourites').length;
-                    log("Hive data: $data");
-                  },
-                  child: const Categories()),
+                onTap: () {},
+                child: const Categories(),
+              ),
             ),
             Expanded(
               child: ScrollConfiguration(
@@ -65,52 +64,103 @@ class _MainScreenState extends State<MainScreen> {
                         future: songs,
                         initialData: const [],
                         builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            final data = snapshot.data!;
-                            final box = Hive.box('favourites');
-                            if (data.isNotEmpty) {
-                              return ListView(
-                                controller: scrollController,
-                                physics: const BouncingScrollPhysics(),
-                                children: List.generate(data.length, (index) {
-                                  return MusicCard(
-                                    artist: data[index].artist ?? "Unknown",
-                                    id: data[index].id,
-                                    songName: data[index].displayName,
-                                    url: data[index].data,
-                                    index: index,
-                                    savedId: box.isNotEmpty
-                                        ? int.parse(box.getAt(index)!['id'])
-                                        : -1,
-                                  );
-                                }),
-                              );
-                            } else {
-                              return const Center(
-                                child: Text("Sizda qo'shiqlar mavjud emas..."),
-                              );
-                            }
+                          final data = snapshot.data!;
+                          final box = Hive.box('favourites');
+                          if (data.isNotEmpty) {
+                            return ListView(
+                              controller: scrollController,
+                              physics: const BouncingScrollPhysics(),
+                              children: List.generate(data.length, (index) {
+                                List ids = [];
+                                for (var element in box.values) {
+                                  ids.add(jsonDecode(element)['id']);
+                                }
+                                return MusicCard(
+                                  artist: data[index].artist ?? "Unknown",
+                                  id: data[index].id,
+                                  songName: data[index].displayName,
+                                  url: data[index].data,
+                                  index: index,
+                                  onTap: () async {
+                                    final box = Hive.box('favourites');
+                                    final id_ = data[index].id;
+                                    final songName_ = data[index].displayName;
+                                    final artist_ =
+                                        data[index].artist ?? "Unknown";
+                                    final path_ = data[index].data;
+                                    final details = {
+                                      'id': '$id_',
+                                      'songName': songName_,
+                                      'artist': artist_,
+                                      'path': path_,
+                                    };
+                                    if (!ids
+                                        .contains(data[index].id.toString())) {
+                                      await box.add(jsonEncode(details));
+                                    } else {
+                                      final position = ids.indexWhere((value) {
+                                        return ids.contains(
+                                            data[index].id.toString());
+                                      });
+                                      await box.deleteAt(position);
+                                    }
+                                    setState(() {});
+                                  },
+                                  isSaved:
+                                      ids.contains(data[index].id.toString()),
+                                );
+                              }),
+                            );
                           } else {
                             return const Center(
-                              child: Text("Nimadir xato ketdi..."),
+                              child: Text("Sizda qo'shiqlar mavjud emas..."),
                             );
                           }
                         },
                       ),
                     ),
-                    ListView(
-                      controller: scrollController,
-                      physics: const BouncingScrollPhysics(),
-                      children: List.generate(10, (index) {
-                        return MusicCard(
-                          savedId: 0,
-                          artist: "Diyorbek",
-                          id: 1,
-                          songName: "Ert",
-                          url: "sclnksniksk",
-                          index: index,
-                        );
-                      }),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 17),
+                      child: FutureBuilder<ListFavoutes>(
+                        future: Functions.getFavoutires(),
+                        initialData: ListFavoutes(favourites: []),
+                        builder: (context, snapshot) {
+                          final data = snapshot.data!.favourites;
+                          if (data.isNotEmpty) {
+                            return ListView(
+                              physics: const BouncingScrollPhysics(),
+                              children: List.generate(data.length, (index) {
+                                return MusicCard(
+                                  artist: data[index].artist,
+                                  id: int.parse(data[index].id),
+                                  songName: data[index].songName,
+                                  url: data[index].path,
+                                  index: index,
+                                  onTap: () async {
+                                    final box = Hive.box('favourites');
+                                    List ids = [];
+                                    for (var element in box.values) {
+                                      ids.add(jsonDecode(element)['id']);
+                                    }
+                                    final position = ids.indexWhere((value) {
+                                      return ids
+                                          .contains(data[index].id.toString());
+                                    });
+                                    await box.deleteAt(position);
+                                    setState(() {});
+                                  },
+                                  isSaved: true,
+                                );
+                              }),
+                            );
+                          } else {
+                            return const Center(
+                              child: Text(
+                                  "Siz yoqtirgan qo'shiqlar mavjud emas..."),
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),

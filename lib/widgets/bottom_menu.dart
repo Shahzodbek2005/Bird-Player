@@ -114,19 +114,23 @@ class BottomMenu extends StatelessWidget {
                   initialData: Duration.zero,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      if (snapshot.data == playerService.audioPlayer.duration) {
-                        if (playerService.selectedIndex == list.length - 1) {
-                          playerService.playNext(list[0].data, list.length);
-                          playerService.setIndex(0);
-                        } else {
-                          playerService.playNext(
-                              list[playerService.selectedIndex + 1].data,
-                              list.length);
-                          playerService.setIndex(playerService.selectedIndex++);
+                      if (!playerService.isRepeat) {
+                        if (snapshot.data ==
+                            playerService.audioPlayer.duration) {
+                          if (playerService.selectedIndex == list.length - 1) {
+                            playerService.playNext(list[0].data, list.length);
+                            playerService.setIndex(0);
+                          } else {
+                            playerService.playNext(
+                                list[playerService.selectedIndex + 1].data,
+                                list.length);
+                            playerService
+                                .setIndex(playerService.selectedIndex++);
+                          }
+                          songModel.then((value) {
+                            playerService.playRandom(value);
+                          });
                         }
-                        songModel.then((value) {
-                          playerService.playRandom(value);
-                        });
                       }
                     }
                     return Padding(

@@ -1,3 +1,4 @@
+import 'package:bird_player/classes/music_id.dart';
 import 'package:bird_player/classes/player_service.dart';
 import 'package:bird_player/screens/permission_screen.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,9 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<Future<List<SongModel>>>(
           create: (context) => audioQuery.querySongs(),
+        ),
+        Provider(
+          create: (context) => MusicID(),
         ),
         ChangeNotifierProvider<PlayerService>(
           create: (context) => PlayerService(),

@@ -1,32 +1,38 @@
-import 'dart:convert';
-import 'dart:developer';
-
+import 'package:bird_player/classes/music_id.dart';
 import 'package:bird_player/classes/player_service.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 
-class MusicCard extends StatelessWidget {
+// ignore: must_be_immutable
+class MusicCard extends StatefulWidget {
   final int id;
-  final int savedId;
+  final bool isSaved;
   final String artist;
   final String songName;
   final String url;
   final int index;
-  const MusicCard(
+  VoidCallback onTap;
+  MusicCard(
       {Key? key,
       required this.id,
-      required this.savedId,
+      required this.isSaved,
       required this.artist,
       required this.songName,
       required this.url,
-      required this.index})
+      required this.index,
+      required this.onTap})
       : super(key: key);
 
   @override
+  State<MusicCard> createState() => _MusicCardState();
+}
+
+class _MusicCardState extends State<MusicCard> {
+  @override
   Widget build(BuildContext context) {
     final playerService = Provider.of<PlayerService>(context);
+    final musicID = Provider.of<MusicID>(context);
     return Column(
       children: [
         Container(
@@ -43,7 +49,7 @@ class MusicCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(5),
                 child: QueryArtworkWidget(
-                  id: id,
+                  id: widget.id,
                   type: ArtworkType.AUDIO,
                   keepOldArtwork: true,
                   artworkHeight: 40,
@@ -67,7 +73,7 @@ class MusicCard extends StatelessWidget {
                       child: SizedBox(
                         width: double.infinity,
                         child: Text(
-                          songName,
+                          widget.songName,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: const TextStyle(
@@ -79,7 +85,7 @@ class MusicCard extends StatelessWidget {
                       height: 2,
                     ),
                     Text(
-                      artist,
+                      widget.artist,
                       style: const TextStyle(
                           color: Color(0xFFD8D8D8), fontSize: 12),
                     )
@@ -87,23 +93,9 @@ class MusicCard extends StatelessWidget {
                 ),
               ),
               InkWell(
-                onTap: () async {
-                  log("Liked");
-                  final box = Hive.box<String>('favourites');
-                  final id_ = id;
-                  final songName_ = songName;
-                  final artist_ = artist;
-                  final path_ = url;
-                  final details = {
-                    'id': '$id_',
-                    'songName': songName_,
-                    'artist': artist_,
-                    'url': path_,
-                  };
-                  await box.add("kk");
-                },
+                onTap: widget.onTap,
                 child: Icon(
-                  (id != savedId) ? Icons.favorite_border : Icons.favorite,
+                  (!widget.isSaved) ? Icons.favorite_border : Icons.favorite,
                   color: Colors.white,
                   size: 20,
                 ),
@@ -113,13 +105,16 @@ class MusicCard extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  playerService
-                    ..play(url)
-                    ..setIndex(index);
+                  if (musicID.getMusicID != widget.id) {
+                    playerService
+                      ..play(widget.url)
+                      ..setIndex(widget.index);
+                    musicID.setMusicID(widget.id);
+                  }
                 },
                 child: Consumer<PlayerService>(
                   builder: (context, value, child) {
-                    if (value.selectedIndex == index) {
+                    if (widget.id == musicID.getMusicID) {
                       return value.playWidget;
                     } else {
                       return const Icon(

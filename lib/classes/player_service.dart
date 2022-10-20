@@ -9,6 +9,7 @@ class PlayerService extends ChangeNotifier {
   int selectedIndex = -1;
   var audioPlayer = AudioPlayer();
   bool isShuffle = false;
+  bool isRepeat = false;
 
   Widget playPauseWidget = const Icon(
     Icons.play_arrow,
@@ -105,6 +106,7 @@ class PlayerService extends ChangeNotifier {
   repeat() {
     if (audioPlayer.loopMode == LoopMode.one) {
       audioPlayer.setLoopMode(LoopMode.off);
+      isRepeat = false;
       repeatWidget = Icon(
         Icons.repeat,
         color: Colors.white.withOpacity(0.5),
@@ -112,6 +114,7 @@ class PlayerService extends ChangeNotifier {
       );
     } else if (audioPlayer.loopMode == LoopMode.off) {
       audioPlayer.setLoopMode(LoopMode.one);
+      isRepeat = true;
       repeatWidget = const Icon(
         Icons.repeat_one,
         color: Colors.white,
