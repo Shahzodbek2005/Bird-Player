@@ -38,7 +38,7 @@ class _MainScreenState extends State<MainScreen> {
                   top: 18, bottom: 14, left: 17, right: 17),
               child: GestureDetector(
                 onTap: () async {
-                  await Hive.box<String>('favourites').clear();
+                  await Hive.box('favourites').clear();
                   log("toza");
                 },
                 child: const TopMenu(),
