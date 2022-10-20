@@ -99,7 +99,10 @@ class BottomMenu extends StatelessWidget {
                 );
               } else {
                 return Row(
-                  children: [Text('unknown')],
+                  children: const [
+                    // qoshiqlar null bop qoganda
+                    Text('unknown'),
+                  ],
                 );
               }
             },

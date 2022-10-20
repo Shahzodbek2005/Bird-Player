@@ -7,7 +7,6 @@ import 'package:bird_player/widgets/categories.dart';
 import 'package:bird_player/widgets/music_card.dart';
 import 'package:bird_player/widgets/top_menu.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:hive/hive.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +38,8 @@ class _MainScreenState extends State<MainScreen> {
                   top: 18, bottom: 14, left: 17, right: 17),
               child: GestureDetector(
                 onTap: () async {
-                  await Hive.box('favourites').clear();
+                  await Hive.box<String>('favourites').clear();
+                  log("toza");
                 },
                 child: const TopMenu(),
               ),
@@ -48,8 +48,9 @@ class _MainScreenState extends State<MainScreen> {
               padding: const EdgeInsets.only(bottom: 13, left: 17, right: 17),
               child: GestureDetector(
                   onTap: () async {
-                    final data = await Hive.box('favourites').getAt(1);
-                    log(data);
+                    log("see");
+                    final data = Hive.box<String>('favourites').length;
+                    log("Hive data: $data");
                   },
                   child: const Categories()),
             ),
@@ -65,9 +66,8 @@ class _MainScreenState extends State<MainScreen> {
                         initialData: const [],
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
-                            final box =
-                                Hive.box<Map<String, dynamic>>('favourites');
                             final data = snapshot.data!;
+                            final box = Hive.box('favourites');
                             if (data.isNotEmpty) {
                               return ListView(
                                 controller: scrollController,
@@ -79,7 +79,9 @@ class _MainScreenState extends State<MainScreen> {
                                     songName: data[index].displayName,
                                     url: data[index].data,
                                     index: index,
-                                    savedId: int.parse(box.getAt(index)!['id']),
+                                    savedId: box.isNotEmpty
+                                        ? int.parse(box.getAt(index)!['id'])
+                                        : -1,
                                   );
                                 }),
                               );

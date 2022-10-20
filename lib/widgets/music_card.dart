@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:bird_player/classes/player_service.dart';
 import 'package:flutter/material.dart';
@@ -87,21 +88,22 @@ class MusicCard extends StatelessWidget {
               ),
               InkWell(
                 onTap: () async {
-                  final box = Hive.box('favourites');
+                  log("Liked");
+                  final box = Hive.box<String>('favourites');
                   final id_ = id;
                   final songName_ = songName;
                   final artist_ = artist;
-                  final url_ = url;
+                  final path_ = url;
                   final details = {
                     'id': '$id_',
                     'songName': songName_,
                     'artist': artist_,
-                    'url': url_,
+                    'url': path_,
                   };
-                  box.add(jsonEncode(details));
+                  await box.add("kk");
                 },
                 child: Icon(
-                  (id == savedId) ? Icons.favorite_border : Icons.favorite,
+                  (id != savedId) ? Icons.favorite_border : Icons.favorite,
                   color: Colors.white,
                   size: 20,
                 ),
