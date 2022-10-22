@@ -1,8 +1,11 @@
 import 'dart:io';
 
+import 'package:bird_player/classes/player_service.dart';
+import 'package:bird_player/classes/providers/get_last_music.dart';
 import 'package:bird_player/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -38,6 +41,22 @@ class _PermissionScreenState extends State<PermissionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    final playerService = Provider.of<PlayerService>(context);
+    return Scaffold(
+      body: FutureBuilder(
+        future: GetLastMusic().getLastSong(),
+        initialData: const {},
+        builder: (context, snapshot) {
+          playerService.audioPlayer
+            ..setFilePath(snapshot.data!['path'])
+            ..seek(
+              Duration(
+                seconds: int.parse(snapshot.data!['position'].toString()),
+              ),
+            );
+          return const SizedBox();
+        },
+      ),
+    );
   }
 }

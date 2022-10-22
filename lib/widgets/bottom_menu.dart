@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:bird_player/classes/player_service.dart';
+import 'package:bird_player/classes/providers/last_music.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -20,6 +21,7 @@ class BottomMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final playerService = Provider.of<PlayerService>(context);
+    final lastSong = Provider.of<LastMusic>(context);
     List<SongModel> list = [];
     songModel.then((value) {
       list = value;
@@ -47,6 +49,15 @@ class BottomMenu extends StatelessWidget {
               if (snapshot.hasData) {
                 return Consumer<PlayerService>(
                   builder: (context, value, child) {
+                    final dat = snapshot.data![
+                        (value.selectedIndex == -1) ? 0 : value.selectedIndex];
+                    lastSong.setLastSong(
+                      dat.id,
+                      dat.displayName,
+                      dat.artist ?? "Unknown",
+                      dat.data,
+                      value.audioPlayer.position,
+                    );
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),

@@ -1,5 +1,6 @@
 import 'package:bird_player/classes/music_id.dart';
 import 'package:bird_player/classes/player_service.dart';
+import 'package:bird_player/classes/providers/last_music.dart';
 import 'package:bird_player/screens/permission_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -11,7 +12,10 @@ void main() async {
   Provider.debugCheckInvalidValueType = null;
   await Hive.initFlutter();
   await Hive.openBox('favourites');
-  runApp(const MyApp());
+  await Hive.openBox('last');
+  runApp(
+    const MaterialApp(home: MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -31,10 +35,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<PlayerService>(
           create: (context) => PlayerService(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => LastMusic(),
+        ),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: 'BirdPlayer',
         home: PermissionScreen(),
       ),
     );

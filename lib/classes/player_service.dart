@@ -33,6 +33,12 @@ class PlayerService extends ChangeNotifier {
     size: 25,
   );
 
+  playLastMusic(String filePath, Duration duration) {
+    audioPlayer
+      ..setFilePath(filePath)
+      ..seek(duration);
+  }
+
   setIndex(int newIndex) {
     selectedIndex = newIndex;
     notifyListeners();
