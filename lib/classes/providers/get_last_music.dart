@@ -7,7 +7,8 @@ class GetLastMusic extends ChangeNotifier {
   final box = Hive.box('last');
   Future<Map<String, dynamic>> getLastSong() async {
     final song = await box.get('song');
-    Map<String, dynamic> data = jsonDecode(song);
+    Map<String, dynamic> data =
+        jsonDecode(song) + {'duration': await box.get('duration')};
     return data;
   }
 }

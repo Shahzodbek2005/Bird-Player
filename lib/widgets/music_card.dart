@@ -12,8 +12,9 @@ class MusicCard extends StatefulWidget {
   final String songName;
   final String url;
   final int index;
-  VoidCallback onTap;
-  MusicCard(
+  final VoidCallback onPlay;
+  final VoidCallback onTap;
+  const MusicCard(
       {Key? key,
       required this.id,
       required this.isSaved,
@@ -21,7 +22,8 @@ class MusicCard extends StatefulWidget {
       required this.songName,
       required this.url,
       required this.index,
-      required this.onTap})
+      required this.onTap,
+      required this.onPlay})
       : super(key: key);
 
   @override
@@ -105,6 +107,7 @@ class _MusicCardState extends State<MusicCard> {
               ),
               GestureDetector(
                 onTap: () {
+                  widget.onPlay();
                   if (musicID.getMusicID != widget.id) {
                     playerService
                       ..play(widget.url)

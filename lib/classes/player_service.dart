@@ -16,10 +16,11 @@ class PlayerService extends ChangeNotifier {
     color: Colors.white,
     size: 30,
   );
-  Widget playWidget = const Icon(
-    Icons.play_arrow,
-    color: Colors.white,
-    size: 30,
+  Widget playWidget = LottieBuilder.asset(
+    'assets/lottie.json',
+    width: 30,
+    height: 30,
+    animate: false,
   );
   Widget repeatWidget = Icon(
     Icons.repeat,
@@ -41,6 +42,16 @@ class PlayerService extends ChangeNotifier {
 
   setIndex(int newIndex) {
     selectedIndex = newIndex;
+    notifyListeners();
+  }
+
+  setinitialIndex(Future<List<SongModel>> data, int index) async {
+    final list = await data;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == index) {
+        selectedIndex = i;
+      }
+    }
     notifyListeners();
   }
 

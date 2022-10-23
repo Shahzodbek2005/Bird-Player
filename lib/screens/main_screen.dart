@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:bird_player/classes/functions.dart';
 import 'package:bird_player/classes/models/favourites_model.dart';
 import 'package:bird_player/classes/my_behavior.dart';
+import 'package:bird_player/classes/player_service.dart';
 import 'package:bird_player/classes/providers/last_music.dart';
 import 'package:bird_player/widgets/bottom_menu.dart';
 import 'package:bird_player/widgets/categories.dart';
@@ -31,25 +32,26 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final songs = Provider.of<Future<List<SongModel>>>(context);
     final lastSong = Provider.of<LastMusic>(context);
+    final playerService = Provider.of<PlayerService>(context);
     return WillPopScope(
       onWillPop: () async {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text("Do you want to exit the app?"),
+            content: const Text("Do you want to exit the app?"),
             actions: [
-              ElevatedButton(
+              TextButton(
                 onPressed: () async {
                   final box = Hive.box('last');
-                  await box.put('song', lastSong.getLastSong);
-                  log(await box.get('song'));
+                  await box.put('song', lastSong.lastSong);
+                  await box.put('duration', playerService.audioPlayer.duration);
                 },
                 child: const Text("Ok"),
               ),
               const SizedBox(
                 width: 5,
               ),
-              ElevatedButton(
+              TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -72,7 +74,10 @@ class _MainScreenState extends State<MainScreen> {
                 padding: const EdgeInsets.only(
                     top: 18, bottom: 14, left: 17, right: 17),
                 child: GestureDetector(
-                  onTap: () async {},
+                  onTap: () async {
+                    await Hive.box('new').put('isNew', true);
+                    setState(() {});
+                  },
                   child: const TopMenu(),
                 ),
               ),
@@ -149,6 +154,13 @@ class _MainScreenState extends State<MainScreen> {
                                     },
                                     isSaved:
                                         ids.contains(data[index].id.toString()),
+                                    onPlay: () async {
+                                      final box = Hive.box('new');
+                                      if (box.get('isNew') == true) {
+                                        await box.put('isNew', false);
+                                        setState(() {});
+                                      }
+                                    },
                                   );
                                 }),
                               );
@@ -191,6 +203,13 @@ class _MainScreenState extends State<MainScreen> {
                                       setState(() {});
                                     },
                                     isSaved: true,
+                                    onPlay: () async {
+                                      final box = Hive.box('new');
+                                      if (box.get('isNew') == true) {
+                                        await box.put('isNew', false);
+                                        setState(() {});
+                                      }
+                                    },
                                   );
                                 }),
                               );
@@ -198,6 +217,9 @@ class _MainScreenState extends State<MainScreen> {
                               return const Center(
                                 child: Text(
                                   "Siz yoqtirgan qo'shiqlar mavjud emas...",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
                                 ),
                               );
                             }
@@ -208,9 +230,16 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ),
               ),
-              BottomMenu(
-                songModel: songs,
-              ),
+              Builder(builder: (context) {
+                final box = Hive.box('new');
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  height: box.get('isNew') ? 0 : 150,
+                  child: BottomMenu(
+                    songModel: songs,
+                  ),
+                );
+              }),
             ],
           ),
         ),

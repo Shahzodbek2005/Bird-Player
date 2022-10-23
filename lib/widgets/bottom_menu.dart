@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:bird_player/classes/music_id.dart';
 import 'package:bird_player/classes/player_service.dart';
 import 'package:bird_player/classes/providers/last_music.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class BottomMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final playerService = Provider.of<PlayerService>(context);
     final lastSong = Provider.of<LastMusic>(context);
+    final musicID = Provider.of<MusicID>(context);
     List<SongModel> list = [];
     songModel.then((value) {
       list = value;
@@ -56,7 +58,6 @@ class BottomMenu extends StatelessWidget {
                       dat.displayName,
                       dat.artist ?? "Unknown",
                       dat.data,
-                      value.audioPlayer.position,
                     );
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -109,11 +110,24 @@ class BottomMenu extends StatelessWidget {
                   },
                 );
               } else {
-                return Row(
-                  children: const [
-                    // qoshiqlar null bop qoganda
-                    Text('unknown'),
-                  ],
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Unknown',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      Text(
+                        'Unknown',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ],
+                  ),
                 );
               }
             },
@@ -131,12 +145,14 @@ class BottomMenu extends StatelessWidget {
                           if (playerService.selectedIndex == list.length - 1) {
                             playerService.playNext(list[0].data, list.length);
                             playerService.setIndex(0);
+                            musicID.setMusicID(list[0].id);
                           } else {
                             playerService.playNext(
                                 list[playerService.selectedIndex + 1].data,
                                 list.length);
                             playerService
                                 .setIndex(playerService.selectedIndex++);
+                            musicID.setMusicID(playerService.selectedIndex);
                           }
                           songModel.then((value) {
                             playerService.playRandom(value);
@@ -189,11 +205,13 @@ class BottomMenu extends StatelessWidget {
                               playerService.playPrevious(
                                   songs.last.data, songs.length);
                               playerService.setIndex(songs.length - 1);
+                              musicID.setMusicID(songs[songs.length - 1].id);
                             } else {
                               playerService.playPrevious(
                                   songs[value.selectedIndex - 1].data,
                                   songs.length);
                               playerService.setIndex(value.selectedIndex--);
+                              musicID.setMusicID(songs[value.selectedIndex].id);
                             }
                           },
                           child: const Icon(
@@ -221,11 +239,13 @@ class BottomMenu extends StatelessWidget {
                               playerService.playNext(
                                   songs[0].data, songs.length);
                               playerService.setIndex(0);
+                              musicID.setMusicID(songs[0].id);
                             } else {
                               playerService.playNext(
                                   songs[value.selectedIndex + 1].data,
                                   songs.length);
                               playerService.setIndex(value.selectedIndex++);
+                              musicID.setMusicID(songs[value.selectedIndex].id);
                             }
                           },
                           child: const Icon(

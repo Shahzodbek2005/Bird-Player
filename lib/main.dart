@@ -13,9 +13,8 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('favourites');
   await Hive.openBox('last');
-  runApp(
-    const MaterialApp(home: MyApp()),
-  );
+  await Hive.openBox('new');
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
